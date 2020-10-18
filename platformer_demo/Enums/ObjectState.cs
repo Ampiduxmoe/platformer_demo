@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace platformer_demo.Character
+namespace platformer_demo.Enums
 {
-    public enum HeroState
+    public enum ObjectState
     {
         Standing,
         Falling, 

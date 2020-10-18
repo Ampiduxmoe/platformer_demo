@@ -5,23 +5,31 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace platformer_demo
+namespace platformer_demo.Environment
 {
     public class Map : IEntity
     {
         //TODO: background, foreground, layout, other objects
 
-        private Point _position;
-        public Point Position { get { return _position; } set { } }
+        private Vector2 _position;
+        public Vector2 Position { get { return _position; } set { } }
 
         private List<IEntity> _entities;
         public List<IEntity> Entities { get { return _entities; } set { } }
 
         public Point Size { get { return GetSize(); } set { } }
 
-        public Rectangle Rect { get { return new Rectangle(Position, Size); } set { } }
+        public Rectangle Rect { get { return new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y), Size.X, Size.Y); } set { } }
+
+        public Point Center
+        {
+            get { return new Point(Rect.X + Size.X / 2, Rect.Y + Size.Y / 2); }
+            set { Position = new Vector2(value.X - Size.X / 2, value.Y - Size.Y / 2); }
+        }
 
         public Camera MapCamera { get; set; }
+
+        private Queue<IEntity> _deletionQueue;
 
         public void AddEntity(IEntity entity)
         {
@@ -45,16 +53,17 @@ namespace platformer_demo
 
         public void Initialize()
         {
-            _position = new Point(0, 0);
+            _position = new Vector2(0, 0);
             _entities = new List<IEntity>();
+            _deletionQueue = new Queue<IEntity>();
             MapCamera.Initialize();
         }
 
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime) => OffsetDraw(spriteBatch, gameTime, Point.Zero);
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime) => OffsetDraw(spriteBatch, gameTime, Vector2.Zero);
 
-        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Point offset)
+        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Vector2 offset)
         {
-            MapCamera.OffsetDraw(spriteBatch, gameTime, Point.Zero);
+            MapCamera.OffsetDraw(spriteBatch, gameTime, offset);
         }
 
         public void Load(ContentManager content)
@@ -68,7 +77,19 @@ namespace platformer_demo
         {
             if (Entities.Count > 0)
                 foreach (IEntity entity in _entities)
+                {
                     entity.Update(gameTime);
+                    if (entity is Projectile)
+                    {
+                        Projectile projectile = entity as Projectile;
+                        if (projectile.TimeElapsed > projectile.LifeLength)
+                            _deletionQueue.Enqueue(entity);
+                    }
+                }
+
+            while (_deletionQueue.Count > 0)
+                Entities.Remove(_deletionQueue.Dequeue());
+
             MapCamera.Update(gameTime);
         }
     }

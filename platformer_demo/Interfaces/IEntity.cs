@@ -6,11 +6,13 @@ namespace platformer_demo
 {
     public interface IEntity
     {
-        public Point Position { get; set; }
+        public Vector2 Position { get; set; }
 
         public Point Size { get; set; }
 
         public Rectangle Rect { get; set; }
+
+        public Point Center { get; set; }
 
         public void Initialize();
 
@@ -18,7 +20,7 @@ namespace platformer_demo
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime);
 
-        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Point offset);
+        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Vector2 offset);
 
         public void Update(GameTime gameTime);
     }

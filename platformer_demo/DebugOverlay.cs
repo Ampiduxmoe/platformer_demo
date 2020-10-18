@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using platformer_demo.Enums;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,7 +19,7 @@ namespace platformer_demo.Character
         public static SpriteFont Font { get { return _font; } }
         private Color _defaultDebugColor = Color.DarkRed;
 
-        private static Point _overlayPosition;
+        private static Vector2 _overlayPosition;
 
         private Point _graphicsDebugPosition;
         private Color _graphicsDebugColor;
@@ -33,6 +35,8 @@ namespace platformer_demo.Character
         private Color _gameInfoDebugColor;
         private Vector2 _gameInfoDebugMeasure;
         private string _updateFrequency;
+        private string _gameTime;
+        private string _gameSpeed;
         private string _gameInfoDebugText;
 
         private Point _heroDebugPosition;
@@ -60,7 +64,16 @@ namespace platformer_demo.Character
         private string _cameraEntityCount;
         private string _cameraInfoDebugText;
 
-        public Point Position { get { return _overlayPosition; } set { _overlayPosition = value; } }
+        public Rectangle Rect { get { return new Rectangle((int)Math.Round(Position.X), (int)Math.Round(Position.Y), Size.X, Size.Y); } set { } }
+
+        public Point Center 
+        { 
+            get { return new Point(Rect.X + Size.X / 2, Rect.Y + Size.Y / 2); } 
+            set { Position = new Vector2(value.X - Size.X / 2, value.Y - Size.Y / 2); } 
+        }
+
+        public Vector2 Position { get { return _overlayPosition; } set { _overlayPosition = value; } }
+
         public Point Size 
         {
             get 
@@ -83,13 +96,11 @@ namespace platformer_demo.Character
             set { } 
         }
 
-        public Rectangle Rect { get { return new Rectangle(Position, Size); } set { } }
-
         public DebugOverlay() { }
 
-        public void Draw(SpriteBatch spriteBatch, GameTime gameTime) => OffsetDraw(spriteBatch, gameTime, Point.Zero);
+        public void Draw(SpriteBatch spriteBatch, GameTime gameTime) => OffsetDraw(spriteBatch, gameTime, Vector2.Zero);
 
-        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Point offset)
+        public void OffsetDraw(SpriteBatch spriteBatch, GameTime gameTime, Vector2 offset)
         {
             spriteBatch.DrawString(
                 _font,
@@ -101,7 +112,7 @@ namespace platformer_demo.Character
                 _font,
                 _gameInfoDebugText,
                 new Vector2(_overlayPosition.X + _gameInfoDebugPosition.X + offset.X, _overlayPosition.Y + _gameInfoDebugPosition.Y + offset.Y),
-                _graphicsDebugColor);
+                _gameInfoDebugColor);
 
             spriteBatch.DrawString(
                 _font,
@@ -124,7 +135,7 @@ namespace platformer_demo.Character
 
         public void Initialize()
         {
-            _overlayPosition = new Point(10, 10);
+            _overlayPosition = new Vector2(10, 10);
 
             _graphicsDebugPosition = new Point(0, 0);
             _graphicsDebugColor = _defaultDebugColor;
@@ -164,10 +175,12 @@ namespace platformer_demo.Character
 
             _updateFrequency = debugInfo.UpdatesProcessed == 0 ? 
                 "Update Frequency: NaN" : $"Update Frequency: {Math.Round(debugInfo.UpdatesProcessed * 1000 / debugInfo.ElapsedMiliseconds, 2)} Hz";
-            _gameInfoDebugText = $"<<GAME>> \n{_updateFrequency}";
+            _gameTime = $"Time: {GameParameters.Clock.Hours}h {GameParameters.Clock.Minutes}m {GameParameters.Clock.Seconds}s {(GameParameters.Clock.Miliseconds / 10):f0}ms";
+            _gameSpeed = $"Game Speed: {GameParameters.GameSpeed:f2}";
+            _gameInfoDebugText = $"<<GAME>> \n{_updateFrequency} \n{_gameTime} \n{_gameSpeed}";
 
             _hero = debugInfo.CurrentHero;
-            _heroPosition = $"Screen: X = {_hero.Position.X}, Y = {_hero.Position.Y}";
+            _heroPosition = $"Map: X = {_hero.Position.X:f2}, Y = {_hero.Position.Y:f2}";
             _heroSpeed = $"Speed: X = {(int)_hero.Speed.X}, Y = {(int)_hero.Speed.Y}";
             _heroSize = $"Size: X = {_hero.Size.X}, Y = {_hero.Size.Y}";
             _state = $"State: {_hero.State}";

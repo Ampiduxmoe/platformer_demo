@@ -1,6 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
 using platformer_demo.Character;
+using platformer_demo.Environment;
+using platformer_demo.Enums;
+
 using System;
 using System.Collections.Generic;
 using System.Text;

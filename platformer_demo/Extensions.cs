@@ -2,15 +2,35 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using System;
+
 namespace platformer_demo
 {
     public static class Extensions
     {
+        public static bool Intersects(this Ray2 ray, Rectangle rectangle, out float near, out float far)
+        {
+            Point2 center = new Point2(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2);
+            Size2 halfExtents = new Size2(rectangle.Width / 2, rectangle.Height / 2);
+            BoundingRectangle boundingRectangle = new BoundingRectangle(center, halfExtents);
+
+            return ray.Intersects(boundingRectangle, out near, out far);
+        }
+
+        public static bool Crosses(this Ray2 ray, Rectangle rectangle, out float near, out float far)
+        {
+            Point2 center = new Point2(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2);
+            Size2 halfExtents = new Size2(rectangle.Width / 2, rectangle.Height / 2);
+            BoundingRectangle boundingRectangle = new BoundingRectangle(center, halfExtents);
+
+            return ray.Crosses(boundingRectangle, out near, out far);
+        }
+
         public static bool Crosses(this Ray2 ray, BoundingRectangle boundingRectangle, out float near, out float far)
         {
             if (ray.Direction.X < 0 && ray.Direction.Y < 0)
             {
-                if (boundingRectangle.Center.X - boundingRectangle.HalfExtents.X > ray.Position.X || 
+                if (boundingRectangle.Center.X - boundingRectangle.HalfExtents.X > ray.Position.X ||
                     boundingRectangle.Center.Y - boundingRectangle.HalfExtents.Y > ray.Position.Y)
                 {
                     near = float.NaN;
@@ -27,7 +47,7 @@ namespace platformer_demo
 
             if (ray.Direction.X < 0)
             {
-                if (boundingRectangle.Center.X - boundingRectangle.HalfExtents.X > ray.Position.X || 
+                if (boundingRectangle.Center.X - boundingRectangle.HalfExtents.X > ray.Position.X ||
                     boundingRectangle.Center.Y + boundingRectangle.HalfExtents.Y < ray.Position.Y)
                 {
                     near = float.NaN;
@@ -44,7 +64,7 @@ namespace platformer_demo
 
             if (ray.Direction.Y < 0)
             {
-                if (boundingRectangle.Center.X + boundingRectangle.HalfExtents.X < ray.Position.X || 
+                if (boundingRectangle.Center.X + boundingRectangle.HalfExtents.X < ray.Position.X ||
                     boundingRectangle.Center.Y - boundingRectangle.HalfExtents.Y > ray.Position.Y)
                 {
                     near = float.NaN;
@@ -59,7 +79,7 @@ namespace platformer_demo
                 return dummyRay.Intersects(dummyRect, out near, out far);
             }
 
-            if (boundingRectangle.Center.X + boundingRectangle.HalfExtents.X < ray.Position.X || 
+            if (boundingRectangle.Center.X + boundingRectangle.HalfExtents.X < ray.Position.X ||
                 boundingRectangle.Center.Y + boundingRectangle.HalfExtents.Y < ray.Position.Y)
             {
                 near = float.NaN;
@@ -70,15 +90,15 @@ namespace platformer_demo
             return ray.Intersects(boundingRectangle, out near, out far);
         }
 
-        public static void OffsetDraw(this SpriteBatch spriteBatch, Texture2D texture, Rectangle destinationRectangle, Point offset, Color color)
+        public static void OffsetDraw(this SpriteBatch spriteBatch, Texture2D texture, Rectangle destinationRectangle, Vector2 offset, Color color)
         {
             spriteBatch.Draw(
                 texture,
-                new Rectangle(new Point(destinationRectangle.X + offset.X, destinationRectangle.Y + offset.Y), destinationRectangle.Size),
+                new Rectangle(new Point(destinationRectangle.X + (int)Math.Round(offset.X), destinationRectangle.Y + (int)Math.Round(offset.Y)), destinationRectangle.Size),
                 color);
         }
 
-        public static void OffsetDrawString(this SpriteBatch spriteBatch, SpriteFont spriteFont, string text, Vector2 position, Point offset, Color color)
+        public static void OffsetDrawString(this SpriteBatch spriteBatch, SpriteFont spriteFont, string text, Vector2 position, Vector2 offset, Color color)
         {
             spriteBatch.DrawString(
                 spriteFont,
@@ -87,7 +107,7 @@ namespace platformer_demo
                 color);
         }
 
-        public static void OffsetDrawLine(this SpriteBatch spriteBatch, float x1, float y1, float x2, float y2, Point offset, Color color, float thickness = 1, float layerDepth = 0)
+        public static void OffsetDrawLine(this SpriteBatch spriteBatch, float x1, float y1, float x2, float y2, Vector2 offset, Color color, float thickness = 1, float layerDepth = 0)
         {
             spriteBatch.DrawLine(
                 x1 + offset.X, 
